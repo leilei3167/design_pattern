@@ -12,15 +12,16 @@ type Table struct {
 	name       string
 	recordType reflect.Type   //这张表里存放的类型
 	records    map[any]record //一张表中的所有数据
-	//todo 迭代器
 
+	iteratorFactory TableIteratorFactory
 }
 
 func NewTable(name string) *Table {
 	return &Table{
-		name:       name,
-		recordType: nil,
-		records:    make(map[any]record),
+		name:            name,
+		recordType:      nil,
+		records:         make(map[any]record),
+		iteratorFactory: NewRandomTableIteratorFactory(),
 	}
 }
 
@@ -29,7 +30,14 @@ func (t *Table) WithType(recordType reflect.Type) *Table {
 	return t
 }
 
-//todo WithTableInteratorFactory
+func (t *Table) WithTableIteratorFactory(iteratorFactory TableIteratorFactory) *Table {
+	t.iteratorFactory = iteratorFactory
+	return t
+}
+
+func (t *Table) Iterator() TableIterator {
+	return t.iteratorFactory.Create(t)
+}
 
 func (t *Table) Name() string {
 	return t.name
